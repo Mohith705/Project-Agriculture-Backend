@@ -1,0 +1,140 @@
+openapi: 3.0.0
+info:
+  title: Machinary Marketplace Backend API
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+paths:
+
+  /auth/admin/signup:
+    post:
+      tags: [Admin Auth]
+      summary: Admin Signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "201":
+          description: Admin Created
+
+  /auth/admin/login:
+    post:
+      tags: [Admin Auth]
+      summary: Admin Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: Login Success
+
+  /auth/customer/signup:
+    post:
+      tags: [Customer Auth]
+      summary: Customer Signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName: { type: string }
+                email: { type: string }
+                phone: { type: string }
+                password: { type: string }
+      responses:
+        "201":
+          description: Customer Created
+
+  /auth/customer/login:
+    post:
+      tags: [Customer Auth]
+      summary: Customer Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: Login Success
+
+  /payments/customer/razorpay/order:
+    post:
+      tags: [Customer Payment]
+      summary: Create Razorpay Order
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Order Created
+
+  /payments/customer/razorpay/verify:
+    post:
+      tags: [Customer Payment]
+      summary: Verify Razorpay signature
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                razorpay_order_id: { type: string }
+                razorpay_payment_id: { type: string }
+                razorpay_signature: { type: string }
+      responses:
+        "200":
+          description: Payment verified successfully
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  /api/v1/customer/dashboard/stats:
+    get:
+      tags:
+        - Customer Dashboard
+      summary: Fetch dashboard metrics for customer user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  activeListings:
+                    type: number
+                  activeBuyers:
+                    type: number
+                  soldThisMonth:
+                    type: number
