@@ -13,13 +13,14 @@ const customerSchema = new mongoose.Schema(
         },
         password: { type: String, required: true, select: false },
 
-        paymentCompleted: { type: Boolean, default: false },
+        paymentCompleted: { type: Boolean, default: true },
         paymentDetails: {
-            orderId: String,
-            paymentId: String,
-            signature: String,
-            paidAt: Date
+            orderId: { type: String, default: "123" },
+            paymentId: { type: String, default: "12345" },
+            signature: { type: String, default: "mohith" },
+            paidAt: { type: String, default: "24-05-2025" }
         },
+
 
         status: {
             type: String,

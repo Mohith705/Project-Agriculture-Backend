@@ -18,7 +18,17 @@ const router = express.Router();
  *   post:
  *     summary: Create a new listing
  *     tags: [Listings]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Listing'
+ *     responses:
+ *       201:
+ *         description: Listing submitted for admin review
  */
+
 router.post("/create", protect, createListing);
 
 /**
@@ -27,7 +37,11 @@ router.post("/create", protect, createListing);
  *   get:
  *     summary: Get all approved listings (customer view)
  *     tags: [Listings]
+ *     responses:
+ *       200:
+ *         description: List of approved listings
  */
+
 router.get("/approved", protect, getApprovedListings);
 
 /**
@@ -36,7 +50,11 @@ router.get("/approved", protect, getApprovedListings);
  *   get:
  *     summary: Get dashboard stats
  *     tags: [Listings]
+ *     responses:
+ *       200:
+ *         description: dashboard stats
  */
+
 router.get("/dashboard/stats", protect, getDashboardStats);
 
 /**
@@ -45,7 +63,11 @@ router.get("/dashboard/stats", protect, getDashboardStats);
  *   get:
  *     summary: Get all listings for admin
  *     tags: [Listings]
+ *     responses:
+ *       200:
+ *         description: List of all listings for admin
  */
+
 router.get("/admin/all", protect, adminOnly, getAllListings);
 
 /**
@@ -54,7 +76,15 @@ router.get("/admin/all", protect, adminOnly, getAllListings);
  *   put:
  *     summary: Approve listing (admin)
  *     tags: [Listings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Listing approved
  */
+
 router.put("/admin/approve/:id", protect, adminOnly, approveListing);
 
 /**
@@ -63,7 +93,15 @@ router.put("/admin/approve/:id", protect, adminOnly, approveListing);
  *   put:
  *     summary: Reject listing (admin)
  *     tags: [Listings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Listing rejected
  */
+
 router.put("/admin/reject/:id", protect, adminOnly, rejectListing);
 
 /**
@@ -72,7 +110,15 @@ router.put("/admin/reject/:id", protect, adminOnly, rejectListing);
  *   delete:
  *     summary: Delete listing (admin)
  *     tags: [Listings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Listing deleted
  */
+
 router.delete("/admin/delete/:id", protect, adminOnly, deleteListing);
 
 export default router;

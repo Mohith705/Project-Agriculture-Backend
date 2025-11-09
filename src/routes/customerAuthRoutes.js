@@ -1,30 +1,36 @@
 import { Router } from "express";
 import validate from "../middlewares/validate.js";
-import { customerSignupValidation, razorpayVerifyValidation } from "../validations/customerAuth.validation.js";
 import * as custAuth from "../controllers/customerAuthController.js";
+import { customerSignupValidation, razorpayVerifyValidation, customerLoginValidation } from "../validations/customerAuth.validation.js";
+
 
 const router = Router();
 
 /**
  * @swagger
+ * tags:
+ *   name: Customer Auth
+ */
+
+/**
+ * @swagger
  * /customer/auth/signup:
  *   post:
- *     summary: Register a new customer and create Razorpay order
+ *     summary: Register customer and create Razorpay order
  *     tags: [Customer Auth]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               fullName: { type: string }
- *               phoneNumber: { type: string }
- *               address: { type: string }
- *               machineryType: { type: string }
+ *           example:
+ *             fullName: "Mohith Bayya"
+ *             phoneNumber: "9876543210"
+ *             address: "Hyderabad"
+ *             machineryType: "Tractor"
+ *             password: "123456"
  *     responses:
  *       201:
- *         description: Customer created and order generated
+ *         description: Razorpay order created
  */
 router.post("/customer/auth/signup", validate(customerSignupValidation), custAuth.customerSignup);
 
@@ -32,23 +38,40 @@ router.post("/customer/auth/signup", validate(customerSignupValidation), custAut
  * @swagger
  * /customer/auth/verify-payment:
  *   post:
- *     summary: Verify Razorpay payment
+ *     summary: Verify Razorpay payment after signup
  *     tags: [Customer Auth]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               razorpay_order_id: { type: string }
- *               razorpay_payment_id: { type: string }
- *               razorpay_signature: { type: string }
- *               customerId: { type: string }
+ *           example:
+ *             razorpay_order_id: "order_LSGG5..."
+ *             razorpay_payment_id: "pay_LSGH8..."
+ *             razorpay_signature: "snjdn239d9..."
+ *             customerId: "67394a8d4e..."
  *     responses:
  *       200:
- *         description: Payment verified successfully
+ *         description: Payment successful & token returned
  */
 router.post("/customer/auth/verify-payment", validate(razorpayVerifyValidation), custAuth.verifyRazorpayPayment);
+
+/**
+ * @swagger
+ * /customer/auth/login:
+ *   post:
+ *     summary: Login customer and get JWT token
+ *     tags: [Customer Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             phoneNumber: "9876543210"
+ *             password: "123456"
+ *     responses:
+ *       200:
+ *         description: Customer logged in successfully
+ */
+router.post("/customer/auth/login", validate(customerLoginValidation), custAuth.customerLogin);
 
 export default router;
