@@ -18,9 +18,9 @@ const limiter = rateLimit({
 app.use(limiter);
 
 app.use(cors());
+app.set("trust proxy", 1);
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true }));
-
 app.use("/api", routes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

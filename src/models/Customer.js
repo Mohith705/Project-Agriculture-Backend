@@ -20,16 +20,11 @@ const customerSchema = new mongoose.Schema(
             signature: { type: String, default: "mohith" },
             paidAt: { type: String, default: "24-05-2025" }
         },
-
-
         status: {
             type: String,
-            enum: ["active", "suspended", "deleted"],
+            enum: ["active", "suspended","inactive","deleted"],
             default: "active"
         },
-
-        suspended: { type: Boolean, default: false },
-        deleted: { type: Boolean, default: false },
 
     },
     { timestamps: true }

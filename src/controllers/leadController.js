@@ -12,7 +12,7 @@ export const createLead = catchAsync(async (req, res) => {
 
     const lead = await Lead.create({
         listing: listingId,
-        buyer: req.user.id,
+        buyer: req.user.sub,
         message,
         contactPhone
     });

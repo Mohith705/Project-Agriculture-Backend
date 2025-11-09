@@ -21,7 +21,7 @@ export const protect = async (req, res, next) => {
 // Only Admin allowed
 export const adminOnly = async (req, res, next) => {
     try {
-        if (req.user.role !== "admin") {
+        if (!req.user || req.user.role !== "admin") {
             throw new ApiError(httpStatus.UNAUTHORIZED, "Admin Access Only");
         }
 
@@ -39,7 +39,7 @@ export const adminOnly = async (req, res, next) => {
 // Only Customer allowed
 export const customerOnly = async (req, res, next) => {
     try {
-        if (req.user.role !== "customer") {
+        if (!req.user || req.user.role !== "customer") {
             throw new ApiError(httpStatus.UNAUTHORIZED, "Customer Access Only");
         }
 

@@ -16,7 +16,7 @@ export const paymentVerify = catchAsync(async (req, res) => {
     }
 
     // mark customer paid
-    await Customer.findByIdAndUpdate(req.user.id, {
+    await Customer.findByIdAndUpdate(req.user.sub, {
         paymentStatus: "paid",
         paymentDetails: { razorpay_order_id, razorpay_payment_id }
     });

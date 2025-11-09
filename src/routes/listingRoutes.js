@@ -7,8 +7,9 @@ import {
     deleteListing,
     getApprovedListings,
     getDashboardStats,
+    getMyListings,
 } from "../controllers/listingController.js";
-import { protect, adminOnly } from "../middlewares/auth.js";
+import { protect, adminOnly, customerOnly } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -46,6 +47,19 @@ router.get("/approved", protect, getApprovedListings);
 
 /**
  * @swagger
+ * /listings/my-listings:
+ *   get:
+ *     summary: Get all listings created by the current user
+ *     tags: [Listings]
+ *     responses:
+ *       200:
+ *         description: List of user's listings
+ */
+
+router.get("/my-listings", protect, getMyListings);
+
+/**
+ * @swagger
  * /listings/dashboard/stats:
  *   get:
  *     summary: Get dashboard stats
@@ -55,7 +69,7 @@ router.get("/approved", protect, getApprovedListings);
  *         description: dashboard stats
  */
 
-router.get("/dashboard/stats", protect, getDashboardStats);
+router.get("/dashboard/stats", protect, customerOnly, getDashboardStats);
 
 /**
  * @swagger

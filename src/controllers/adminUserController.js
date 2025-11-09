@@ -27,6 +27,6 @@ export const deleteCustomer = catchAsync(async (req, res) => {
 
 
 export const unsuspendCustomer = catchAsync(async (req, res) => {
-    const updated = await Customer.findByIdAndUpdate(req.params.id, { suspended: false }, { new: true });
+    const updated = await Customer.findByIdAndUpdate(req.params.id, { status: "active" }, { new: true });
     res.json({ message: "Customer Unsuspended", customer: updated });
 });

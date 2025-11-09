@@ -5,7 +5,7 @@ import httpStatus from "http-status";
 
 // Create new listing
 export const createListing = catchAsync(async (req, res) => {
-    const customerId = req.user.id;
+    const customerId = req.user.sub;
     const listing = await Listing.create({ ...req.body, customer: customerId });
     res.status(httpStatus.CREATED).json({
         status: true,
@@ -23,6 +23,13 @@ export const getAllListings = catchAsync(async (req, res) => {
 // Get approved listings (for customers)
 export const getApprovedListings = catchAsync(async (req, res) => {
     const listings = await Listing.find({ status: "approved" });
+    res.json({ status: true, listings });
+});
+
+// Get user's own listings
+export const getMyListings = catchAsync(async (req, res) => {
+    const customerId = req.user.sub;
+    const listings = await Listing.find({ customer: customerId }).populate("customer", "fullName phoneNumber");
     res.json({ status: true, listings });
 });
 
@@ -51,7 +58,7 @@ export const deleteListing = catchAsync(async (req, res) => {
 
 // Dashboard counts
 export const getDashboardStats = catchAsync(async (req, res) => {
-    const customerId = req.user.id;
+    const customerId = req.user._id; // After customerOnly middleware, req.user is the full customer document
     const [activeListings, activeBuyers, soldThisMonth] = await Promise.all([
         Listing.countDocuments({ customer: customerId, status: "approved" }),
         Listing.countDocuments({ status: "approved" }), // can later filter by interested users

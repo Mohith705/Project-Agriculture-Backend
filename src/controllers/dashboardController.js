@@ -1,9 +1,10 @@
 import Listing from "../models/Listing.js";
 import Customer from "../models/Customer.js";
 import mongoose from "mongoose";
+import catchAsync from "../utils/catchAsync.js";
 
-export const getDashboardCounts = async (req, res) => {
-    const customerId = req.user.userId; // from JWT
+export const getDashboardCounts = catchAsync(async (req, res) => {
+    const customerId = req.user._id; // After customerOnly middleware, req.user is the full customer document
 
     const activeListings = await Listing.countDocuments({
         customer: new mongoose.Types.ObjectId(customerId),
@@ -28,4 +29,4 @@ export const getDashboardCounts = async (req, res) => {
         activeBuyers,
         soldThisMonth
     });
-};
+});

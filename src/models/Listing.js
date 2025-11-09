@@ -15,7 +15,7 @@ const listingSchema = new mongoose.Schema(
         },
         condition: {
             type: String,
-            enum: ["Good", "Fair"],
+            enum: ["Excellent", "Good", "Fair"],
             required: true,
         },
         price: { type: Number, required: true },

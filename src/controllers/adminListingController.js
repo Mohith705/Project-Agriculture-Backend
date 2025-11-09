@@ -13,7 +13,7 @@ export const adminGetListings = catchAsync(async (req, res) => {
     const skip = (page - 1) * limit;
 
     const listings = await Listing.find(filter)
-        .populate("owner", "fullName phoneNumber")
+        .populate("customer", "fullName phoneNumber")
         .skip(skip)
         .limit(Number(limit))
         .sort({ createdAt: -1 });
