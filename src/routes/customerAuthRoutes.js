@@ -1,7 +1,9 @@
 import { Router } from "express";
 import validate from "../middlewares/validate.js";
 import * as custAuth from "../controllers/customerAuthController.js";
-import { customerSignupValidation, razorpayVerifyValidation, customerLoginValidation } from "../validations/customerAuth.validation.js";
+import { customerSignupValidation, razorpayVerifyValidation, customerLoginValidation, updateProfileValidation } from "../validations/customerAuth.validation.js";
+import { protect, customerOnly } from "../middlewares/auth.js";
+import { paymentCheck } from "../middlewares/paymentCheck.js";
 
 
 const router = Router();
@@ -73,5 +75,43 @@ router.post("/customer/auth/verify-payment", validate(razorpayVerifyValidation),
  *         description: Customer logged in successfully
  */
 router.post("/customer/auth/login", validate(customerLoginValidation), custAuth.customerLogin);
+
+/**
+ * @swagger
+ * /customer/auth/profile:
+ *   get:
+ *     summary: Get customer profile
+ *     tags: [Customer Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profile fetched successfully
+ */
+router.get("/customer/auth/profile", protect, customerOnly, paymentCheck, custAuth.getProfile);
+
+/**
+ * @swagger
+ * /customer/auth/profile:
+ *   put:
+ *     summary: Update customer profile
+ *     tags: [Customer Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             fullName: "John Doe"
+ *             phoneNumber: "9876543210"
+ *             address: "New Address"
+ *             machineryType: "Harvester"
+ *             profilePicUrl: "https://example.com/pic.jpg"
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ */
+router.put("/customer/auth/profile", protect, customerOnly, paymentCheck, validate(updateProfileValidation), custAuth.updateProfile);
 
 export default router;

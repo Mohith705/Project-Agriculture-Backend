@@ -16,7 +16,10 @@ const limiter = rateLimit({
     max: 80
 });
 app.use(limiter);
-
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.originalUrl}`);
+    next();
+});
 app.use(cors());
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "20mb" }));

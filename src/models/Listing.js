@@ -34,6 +34,7 @@ const listingSchema = new mongoose.Schema(
             enum: ["pending_review", "approved", "rejected", "deleted"],
             default: "pending_review",
         },
+        rejectionReason: { type: String },
     },
     { timestamps: true }
 );

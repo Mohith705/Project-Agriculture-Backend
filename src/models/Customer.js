@@ -12,18 +12,19 @@ const customerSchema = new mongoose.Schema(
             required: true
         },
         password: { type: String, required: true, select: false },
+        profilePicUrl: { type: String, default: "" },
 
-        paymentCompleted: { type: Boolean, default: true },
+        paymentCompleted: { type: Boolean, default: false },
         paymentDetails: {
-            orderId: { type: String, default: "123" },
-            paymentId: { type: String, default: "12345" },
-            signature: { type: String, default: "mohith" },
-            paidAt: { type: String, default: "24-05-2025" }
+            orderId: { type: String },
+            paymentId: { type: String },
+            signature: { type: String },
+            paidAt: { type: String }
         },
         status: {
             type: String,
-            enum: ["active", "suspended","inactive","deleted"],
-            default: "active"
+            enum: ["active", "suspended", "inactive", "deleted"],
+            default: "inactive"
         },
 
     },

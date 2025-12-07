@@ -78,6 +78,7 @@ import catchAsync from "../utils/catchAsync.js";
 import Customer from "../models/Customer.js";
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { createNotification } from "../utils/notificationService.js";
 
 const signToken = (user) => {
     return jwt.sign(
@@ -156,9 +157,19 @@ export const verifyRazorpayPayment = catchAsync(async (req, res) => {
 
     const updated = await Customer.findByIdAndUpdate(
         customerId,
-        { paymentCompleted: true, paymentDetails: { razorpay_order_id, razorpay_payment_id } },
+        { paymentCompleted: true, paymentDetails: { razorpay_order_id, razorpay_payment_id }, status: "active" },
         { new: true }
     );
+    if (updated) {
+        await createNotification(
+            updated._id,
+            "Welcome to Agriculture Marketplace!",
+            "Your account is now active. Start listing your machinery or browse available equipment.",
+            "general",
+            { accountStatus: "active" }
+        );
+    }
+
 
     res.json({
         message: "Payment Success",
@@ -167,26 +178,6 @@ export const verifyRazorpayPayment = catchAsync(async (req, res) => {
     });
 });
 
-export const verifySignupPayment = catchAsync(async (req, res) => {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, tempCustomerId } = req.body;
-
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSignature = crypto
-        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "")
-        .update(body.toString())
-        .digest("hex");
-
-    if (expectedSignature !== razorpay_signature)
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid signature");
-
-    // Activate customer now
-    await Customer.findByIdAndUpdate(tempCustomerId, { status: "active" });
-
-    res.status(200).json({
-        status: true,
-        message: "Verification success. Account activated!"
-    });
-});
 
 // Login Customer
 export const customerLogin = catchAsync(async (req, res) => {
@@ -194,6 +185,10 @@ export const customerLogin = catchAsync(async (req, res) => {
 
     const customer = await Customer.findOne({ phoneNumber }).select("+password");
     if (!customer) throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid Credentials");
+
+    if (customer.status === "deleted" || customer.status === "suspended") {
+        throw new ApiError(httpStatus.FORBIDDEN, `Account is ${customer.status}. Contact +91 8985089857 for assistance.`);
+    }
 
     const match = await customer.comparePassword(password);
     if (!match) throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid Credentials");
@@ -205,5 +200,45 @@ export const customerLogin = catchAsync(async (req, res) => {
         message: "Login Success",
         token,
         customer
+    });
+});
+
+// Get Customer Profile
+export const getProfile = catchAsync(async (req, res) => {
+    const customerId = req.user._id; // After customerOnly middleware
+
+    const customer = await Customer.findById(customerId);
+    if (!customer) throw new ApiError(httpStatus.NOT_FOUND, "Customer not found");
+
+    res.status(200).json({
+        status: true,
+        message: "Profile fetched successfully",
+        customer
+    });
+});
+
+// Update Customer Profile
+export const updateProfile = catchAsync(async (req, res) => {
+    const customerId = req.user._id; // After customerOnly middleware
+    const { fullName, phoneNumber, address, machineryType, profilePicUrl } = req.body;
+
+    // Check if phone number is being changed and if it's already taken
+    if (phoneNumber) {
+        const existing = await Customer.findOne({ phoneNumber, _id: { $ne: customerId } });
+        if (existing) throw new ApiError(httpStatus.BAD_REQUEST, "Phone number already in use");
+    }
+
+    const updatedCustomer = await Customer.findByIdAndUpdate(
+        customerId,
+        { fullName, phoneNumber, address, machineryType, profilePicUrl },
+        { new: true, runValidators: true }
+    );
+
+    if (!updatedCustomer) throw new ApiError(httpStatus.NOT_FOUND, "Customer not found");
+
+    res.status(200).json({
+        status: true,
+        message: "Profile updated successfully",
+        customer: updatedCustomer
     });
 });

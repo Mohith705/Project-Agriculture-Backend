@@ -1,6 +1,8 @@
 import express from "express";
 import { protect, adminOnly } from "../middlewares/auth.js";
 import { adminGetListings, adminApproveListing, adminRejectListing, adminDeleteListing } from "../controllers/adminListingController.js";
+import validate from "../middlewares/validate.js";
+import { rejectListingSchema } from "../validations/listing.validation.js";
 
 const router = express.Router();
 
@@ -46,7 +48,7 @@ router.put("/approve/:id", protect, adminOnly, adminApproveListing);
  *       200:
  *         description: Listing rejected
  */
-router.put("/reject/:id", protect, adminOnly, adminRejectListing);
+router.put("/reject/:id", protect, adminOnly, validate(rejectListingSchema), adminRejectListing);
 
 /**
  * @swagger

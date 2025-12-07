@@ -8,8 +8,12 @@ import {
     getApprovedListings,
     getDashboardStats,
     getMyListings,
+    updateListing,
 } from "../controllers/listingController.js";
 import { protect, adminOnly, customerOnly } from "../middlewares/auth.js";
+import validate from "../middlewares/validate.js";
+import { updateListingSchema, rejectListingSchema } from "../validations/listing.validation.js";
+import { paymentCheck } from "../middlewares/paymentCheck.js";
 
 const router = express.Router();
 
@@ -30,7 +34,30 @@ const router = express.Router();
  *         description: Listing submitted for admin review
  */
 
-router.post("/create", protect, createListing);
+router.post("/create", protect, customerOnly, paymentCheck, createListing);
+
+/**
+ * @swagger
+ * /listings/update/{id}:
+ *   put:
+ *     summary: Update a listing (customer)
+ *     tags: [Listings]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Listing'
+ *     responses:
+ *       200:
+ *         description: Listing updated
+ */
+
+router.put("/update/:id", protect, customerOnly, paymentCheck, validate(updateListingSchema), updateListing);
 
 /**
  * @swagger
@@ -56,7 +83,7 @@ router.get("/approved", protect, getApprovedListings);
  *         description: List of user's listings
  */
 
-router.get("/my-listings", protect, getMyListings);
+router.get("/my-listings", protect, customerOnly, paymentCheck, getMyListings);
 
 /**
  * @swagger
@@ -69,7 +96,7 @@ router.get("/my-listings", protect, getMyListings);
  *         description: dashboard stats
  */
 
-router.get("/dashboard/stats", protect, customerOnly, getDashboardStats);
+router.get("/dashboard/stats", protect, customerOnly, paymentCheck, getDashboardStats);
 
 /**
  * @swagger
@@ -116,7 +143,7 @@ router.put("/admin/approve/:id", protect, adminOnly, approveListing);
  *         description: Listing rejected
  */
 
-router.put("/admin/reject/:id", protect, adminOnly, rejectListing);
+router.put("/admin/reject/:id", protect, adminOnly, validate(rejectListingSchema), rejectListing);
 
 /**
  * @swagger

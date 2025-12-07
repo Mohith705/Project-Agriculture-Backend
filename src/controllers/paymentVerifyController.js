@@ -2,6 +2,7 @@ import crypto from "crypto";
 import Customer from "../models/Customer.js";
 import ApiError from "../utils/ApiError.js";
 import catchAsync from "../utils/catchAsync.js";
+import { createNotification } from "../utils/notificationService.js";
 
 export const paymentVerify = catchAsync(async (req, res) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
@@ -16,10 +17,26 @@ export const paymentVerify = catchAsync(async (req, res) => {
     }
 
     // mark customer paid
-    await Customer.findByIdAndUpdate(req.user.sub, {
-        paymentStatus: "paid",
-        paymentDetails: { razorpay_order_id, razorpay_payment_id }
-    });
+    const customer = await Customer.findByIdAndUpdate(
+        req.user.sub,
+        {
+            paymentStatus: "paid",
+            paymentDetails: { razorpay_order_id, razorpay_payment_id },
+            status: "active"
+        },
+        { new: true }
+    );
+    
+    // Send payment confirmation notification
+    if (customer) {
+        await createNotification(
+            customer._id,
+            "Payment Confirmed",
+            "Your payment has been successfully processed. Thank you!",
+            "payment",
+            { orderId: razorpay_order_id, paymentId: razorpay_payment_id }
+        );
+    }
 
     res.json({ status: true, message: "Payment Verified" });
 });

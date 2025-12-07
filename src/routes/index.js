@@ -8,6 +8,7 @@ import adminUserRoutes from "./adminUserRoutes.js";
 import customerAuthRoutes from "./customerAuthRoutes.js";
 import customerDashboardRoutes from "./customerDashboardRoutes.js";
 import listingRoutes from "./listingRoutes.js";
+import notificationRoutes from "./notificationRoutes.js";
 // import leadRoutes from "./leadRoutes.js";
 // import paymentRoutes from "./paymentRoutes.js";
 
@@ -23,6 +24,7 @@ router.use("/admin/users", adminUserRoutes);
 router.use(customerAuthRoutes);
 router.use("/dashboard", customerDashboardRoutes);
 router.use("/listings", listingRoutes);
+router.use(notificationRoutes);
 // router.use("/leads", leadRoutes);
 // router.use("/payments", paymentRoutes);
 

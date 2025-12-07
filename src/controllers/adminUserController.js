@@ -6,6 +6,7 @@ import httpStatus from "http-status";
 // Get all customers
 export const getAllCustomers = catchAsync(async (req, res) => {
     const users = await Customer.find();
+    console.log(users);
     res.json({ status: true, users });
 });
 
