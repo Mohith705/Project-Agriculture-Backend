@@ -10,7 +10,21 @@ const validate = (schema) => (req, res, next) => {
         });
         return next();
     } catch (err) {
-        throw new ApiError(httpStatus.BAD_REQUEST, err.errors?.[0]?.message || "Validation Error");
+        // Better error message extraction from Zod
+        let errorMessage = "Validation Error";
+
+        if (err.errors && err.errors.length > 0) {
+            const firstError = err.errors[0];
+            if (firstError.message) {
+                errorMessage = `${firstError.path.join('.')}: ${firstError.message}`;
+            } else if (firstError.code) {
+                errorMessage = `${firstError.path.join('.')}: ${firstError.code}`;
+            }
+        } else if (err.message) {
+            errorMessage = err.message;
+        }
+
+        throw new ApiError(httpStatus.BAD_REQUEST, errorMessage);
     }
 };
 

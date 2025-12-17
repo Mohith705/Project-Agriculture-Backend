@@ -120,6 +120,7 @@ export const customerSignup = catchAsync(async (req, res) => {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Razorpay order creation failed: ${error.message || error.toString() || 'Unknown error'}`);
     }
 
+
     res.status(201).json({
         status: true,
         message: "Razorpay order created for signup payment",
@@ -157,7 +158,16 @@ export const verifyRazorpayPayment = catchAsync(async (req, res) => {
 
     const updated = await Customer.findByIdAndUpdate(
         customerId,
-        { paymentCompleted: true, paymentDetails: { razorpay_order_id, razorpay_payment_id }, status: "active" },
+        { 
+            paymentCompleted: true, 
+            paymentDetails: { 
+                orderId: razorpay_order_id, 
+                paymentId: razorpay_payment_id, 
+                signature: razorpay_signature, 
+                paidAt: new Date() 
+            }, 
+            status: "active" 
+        },
         { new: true }
     );
     if (updated) {
@@ -195,11 +205,37 @@ export const customerLogin = catchAsync(async (req, res) => {
 
     const token = signToken(customer);
 
+    let finalCustomer = customer;
+    if (!customer.paymentCompleted) {
+        // Generate a new Razorpay order for unpaid customers
+        const razorpay = getRazorpay();
+        try {
+            const order = await razorpay.orders.create({
+                amount: 12500, // 125 INR
+                currency: "INR",
+                receipt: `${customer._id}_${Date.now()}`
+            });
+
+            // Update customer with new orderId
+            finalCustomer = await Customer.findByIdAndUpdate(
+                customer._id,
+                { paymentDetails: { orderId: order.id } },
+                { new: true }
+            );
+        } catch (error) {
+            const errorMsg = error.error?.description || error.message || error.toString();
+            throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Failed to generate payment order: ${errorMsg}`);
+        }
+    }
+
+    // Exclude password from response
+    const { password: _, ...customerData } = finalCustomer.toObject({ minimize: false });
+
     res.status(200).json({
         status: true,
         message: "Login Success",
         token,
-        customer
+        customer: customerData
     });
 });
 
