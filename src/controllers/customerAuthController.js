@@ -82,7 +82,7 @@ import { createNotification } from "../utils/notificationService.js";
 
 const signToken = (user) => {
     return jwt.sign(
-        { sub: user.id, role: "customer", fullName: user.fullName },
+        { sub: user.id, role: "customer", name: user.name },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN }
     );
@@ -98,13 +98,13 @@ const getRazorpay = () => {
 
 // customerSignup (Razorpay order create)
 export const customerSignup = catchAsync(async (req, res) => {
-    const { fullName, phoneNumber,password, address, machineryType } = req.body;
+    const { name, number, password, state, district, mandal, village, pinCode, securityQuestion, securityAnswer } = req.body;
 
-    const already = await Customer.findOne({ phoneNumber });
+    const already = await Customer.findOne({ number });
     if (already) throw new ApiError(httpStatus.BAD_REQUEST, "Phone number already exists");
 
     // create a temporary customer doc (not fully activated until payment verifies)
-    const tempCustomer = await Customer.create({ fullName,password, phoneNumber, address, machineryType, status: "inactive" });
+    const tempCustomer = await Customer.create({ name, number, password, state, district, mandal, village, pinCode, securityQuestion, securityAnswer, status: "inactive" });
 
     // Rs.125 fixed amount only at signup
     const razorpay = getRazorpay();
@@ -191,9 +191,9 @@ export const verifyRazorpayPayment = catchAsync(async (req, res) => {
 
 // Login Customer
 export const customerLogin = catchAsync(async (req, res) => {
-    const { phoneNumber, password } = req.body;
+    const { number, password } = req.body;
 
-    const customer = await Customer.findOne({ phoneNumber }).select("+password");
+    const customer = await Customer.findOne({ number }).select("+password");
     if (!customer) throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid Credentials");
 
     if (customer.status === "deleted" || customer.status === "suspended") {
@@ -256,17 +256,17 @@ export const getProfile = catchAsync(async (req, res) => {
 // Update Customer Profile
 export const updateProfile = catchAsync(async (req, res) => {
     const customerId = req.user._id; // After customerOnly middleware
-    const { fullName, phoneNumber, address, machineryType, profilePicUrl } = req.body;
+    const { name, number, state, district, mandal, village, pinCode, profilePicUrl } = req.body;
 
     // Check if phone number is being changed and if it's already taken
-    if (phoneNumber) {
-        const existing = await Customer.findOne({ phoneNumber, _id: { $ne: customerId } });
+    if (number) {
+        const existing = await Customer.findOne({ number, _id: { $ne: customerId } });
         if (existing) throw new ApiError(httpStatus.BAD_REQUEST, "Phone number already in use");
     }
 
     const updatedCustomer = await Customer.findByIdAndUpdate(
         customerId,
-        { fullName, phoneNumber, address, machineryType, profilePicUrl },
+        { name, number, state, district, mandal, village, pinCode, profilePicUrl },
         { new: true, runValidators: true }
     );
 
@@ -276,5 +276,39 @@ export const updateProfile = catchAsync(async (req, res) => {
         status: true,
         message: "Profile updated successfully",
         customer: updatedCustomer
+    });
+});
+
+// Forgot Password - Step 1: Get Security Question
+export const getSecurityQuestion = catchAsync(async (req, res) => {
+    const { number } = req.body;
+
+    const customer = await Customer.findOne({ number });
+    if (!customer) throw new ApiError(httpStatus.NOT_FOUND, "Phone number not registered");
+
+    res.status(200).json({
+        status: true,
+        message: "Security question retrieved",
+        securityQuestion: customer.securityQuestion,
+        customerId: customer._id
+    });
+});
+
+// Forgot Password - Step 2: Verify Security Answer and Reset Password
+export const resetPasswordWithSecurity = catchAsync(async (req, res) => {
+    const { customerId, securityAnswer, newPassword } = req.body;
+
+    const customer = await Customer.findById(customerId).select("+securityAnswer");
+    if (!customer) throw new ApiError(httpStatus.NOT_FOUND, "Customer not found");
+
+    const isAnswerCorrect = await customer.compareSecurityAnswer(securityAnswer);
+    if (!isAnswerCorrect) throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect security answer");
+
+    customer.password = newPassword;
+    await customer.save();
+
+    res.status(200).json({
+        status: true,
+        message: "Password reset successfully"
     });
 });

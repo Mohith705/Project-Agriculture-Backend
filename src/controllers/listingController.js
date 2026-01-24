@@ -57,20 +57,20 @@ export const updateListing = catchAsync(async (req, res) => {
 
 // Get all listings (admin)
 export const getAllListings = catchAsync(async (req, res) => {
-    const listings = await Listing.find().populate({ path: "customer", select: "fullName phoneNumber profilePicUrl address" });
+    const listings = await Listing.find().populate({ path: "customer", select: "name number profilePicUrl state district mandal village" });
     res.json({ status: true, listings });
 });
 
 // Get approved listings (for customers)
 export const getApprovedListings = catchAsync(async (req, res) => {
-    const listings = await Listing.find({ status: "approved" }).populate({ path: "customer", select: "fullName phoneNumber profilePicUrl address" });
+    const listings = await Listing.find({ status: "approved" }).populate({ path: "customer", select: "name number profilePicUrl state district mandal village" });
     res.json({ status: true, listings });
 });
 
 // Get user's own listings
 export const getMyListings = catchAsync(async (req, res) => {
     const customerId = req.user._id; // After customerOnly middleware, req.user is the full customer document
-    const listings = await Listing.find({ customer: customerId }).populate({ path: "customer", select: "fullName phoneNumber profilePicUrl address" });
+    const listings = await Listing.find({ customer: customerId }).populate({ path: "customer", select: "name number profilePicUrl state district mandal village" });
     res.json({ status: true, listings });
 });
 

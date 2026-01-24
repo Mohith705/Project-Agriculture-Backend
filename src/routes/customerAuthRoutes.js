@@ -1,7 +1,7 @@
 import { Router } from "express";
 import validate from "../middlewares/validate.js";
 import * as custAuth from "../controllers/customerAuthController.js";
-import { customerSignupValidation, razorpayVerifyValidation, customerLoginValidation, updateProfileValidation } from "../validations/customerAuth.validation.js";
+import { customerSignupValidation, razorpayVerifyValidation, customerLoginValidation, updateProfileValidation, getSecurityQuestionValidation, resetPasswordValidation } from "../validations/customerAuth.validation.js";
 import { protect, customerOnly } from "../middlewares/auth.js";
 import { paymentCheck } from "../middlewares/paymentCheck.js";
 
@@ -25,11 +25,16 @@ const router = Router();
  *       content:
  *         application/json:
  *           example:
- *             fullName: "Mohith Bayya"
- *             phoneNumber: "9876543210"
- *             address: "Hyderabad"
- *             machineryType: "Tractor"
- *             password: "123456"
+ *             name: "Mohith Bayya"
+ *             number: "9876543210"
+ *             state: "Telangana"
+ *             district: "Hyderabad"
+ *             mandal: "Serilingampally"
+ *             village: "Madhapur"
+ *             pinCode: "500081"
+ *             password: "1234"
+ *             securityQuestion: "What is your favorite color?"
+ *             securityAnswer: "blue"
  *     responses:
  *       201:
  *         description: Razorpay order created
@@ -68,8 +73,8 @@ router.post("/customer/auth/verify-payment", validate(razorpayVerifyValidation),
  *       content:
  *         application/json:
  *           example:
- *             phoneNumber: "9876543210"
- *             password: "123456"
+ *             number: "9876543210"
+ *             password: "1234"
  *     responses:
  *       200:
  *         description: Customer logged in successfully
@@ -103,15 +108,56 @@ router.get("/customer/auth/profile", protect, customerOnly, paymentCheck, custAu
  *       content:
  *         application/json:
  *           example:
- *             fullName: "John Doe"
- *             phoneNumber: "9876543210"
- *             address: "New Address"
- *             machineryType: "Harvester"
+ *             name: "John Doe"
+ *             number: "9876543210"
+ *             state: "Telangana"
+ *             district: "Hyderabad"
+ *             mandal: "Serilingampally"
+ *             village: "Madhapur"
+ *             pinCode: "500081"
  *             profilePicUrl: "https://example.com/pic.jpg"
  *     responses:
  *       200:
  *         description: Profile updated successfully
  */
 router.put("/customer/auth/profile", protect, customerOnly, paymentCheck, validate(updateProfileValidation), custAuth.updateProfile);
+
+/**
+ * @swagger
+ * /customer/auth/forgot-password/security-question:
+ *   post:
+ *     summary: Get security question for password reset
+ *     tags: [Customer Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             number: "9876543210"
+ *     responses:
+ *       200:
+ *         description: Security question retrieved
+ */
+router.post("/customer/auth/forgot-password/security-question", validate(getSecurityQuestionValidation), custAuth.getSecurityQuestion);
+
+/**
+ * @swagger
+ * /customer/auth/forgot-password/reset:
+ *   post:
+ *     summary: Reset password using security answer
+ *     tags: [Customer Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             customerId: "67394a8d4e..."
+ *             securityAnswer: "my answer"
+ *             newPassword: "1234"
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ */
+router.post("/customer/auth/forgot-password/reset", validate(resetPasswordValidation), custAuth.resetPasswordWithSecurity);
 
 export default router;

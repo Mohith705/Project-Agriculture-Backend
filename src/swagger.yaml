@@ -54,10 +54,16 @@ paths:
             schema:
               type: object
               properties:
-                fullName: { type: string }
-                email: { type: string }
-                phone: { type: string }
+                name: { type: string }
+                number: { type: string }
+                state: { type: string }
+                district: { type: string }
+                mandal: { type: string }
+                village: { type: string }
+                pinCode: { type: string }
                 password: { type: string }
+                securityQuestion: { type: string }
+                securityAnswer: { type: string }
       responses:
         "201":
           description: Customer Created
@@ -73,7 +79,7 @@ paths:
             schema:
               type: object
               properties:
-                phone: { type: string }
+                number: { type: string }
                 password: { type: string }
       responses:
         "200":

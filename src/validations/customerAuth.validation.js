@@ -2,11 +2,16 @@ import { z } from "zod";
 
 export const customerSignupValidation = z.object({
     body: z.object({
-        fullName: z.string().min(3),
-        phoneNumber: z.string().min(10).max(10),
-        address: z.string().min(3),
-        machineryType: z.enum(["Tractor", "Harvester", "Tiller", "Plough", "Seeder", "Sprayer", "Other"]),
-        password: z.string().length(4).regex(/^\d{4}$/, "Password must be exactly 4 digits")
+        name: z.string().min(3),
+        number: z.string().min(10).max(10),
+        state: z.string().min(1),
+        district: z.string().min(1),
+        mandal: z.string().min(1),
+        village: z.string().min(1),
+        pinCode: z.string().optional(),
+        password: z.string().length(4).regex(/^\d{4}$/, "Password must be exactly 4 digits"),
+        securityQuestion: z.string().min(1),
+        securityAnswer: z.string().min(1)
     })
 });
 
@@ -21,17 +26,34 @@ export const razorpayVerifyValidation = z.object({
 
 export const customerLoginValidation = z.object({
     body: z.object({
-        phoneNumber: z.string().min(10).max(10),
+        number: z.string().min(10).max(10),
         password: z.string()
     })
 });
 
 export const updateProfileValidation = z.object({
     body: z.object({
-        fullName: z.string().min(3).optional(),
-        phoneNumber: z.string().min(10).max(10).optional(),
-        address: z.string().min(3).optional(),
-        machineryType: z.enum(["Tractor", "Harvester", "Tiller", "Plough", "Seeder", "Sprayer", "Other"]).optional(),
+        name: z.string().min(3).optional(),
+        number: z.string().min(10).max(10).optional(),
+        state: z.string().min(1).optional(),
+        district: z.string().min(1).optional(),
+        mandal: z.string().min(1).optional(),
+        village: z.string().min(1).optional(),
+        pinCode: z.string().optional(),
         profilePicUrl: z.string().url().optional()
+    })
+});
+
+export const getSecurityQuestionValidation = z.object({
+    body: z.object({
+        number: z.string().min(10).max(10)
+    })
+});
+
+export const resetPasswordValidation = z.object({
+    body: z.object({
+        customerId: z.string(),
+        securityAnswer: z.string().min(1),
+        newPassword: z.string().length(4).regex(/^\d{4}$/, "Password must be exactly 4 digits")
     })
 });

@@ -15,7 +15,7 @@ export const adminGetListings = catchAsync(async (req, res) => {
     const skip = (page - 1) * limit;
 
     const listings = await Listing.find(filter)
-        .populate({ path: "customer", select: "fullName phoneNumber profilePicUrl address" })
+        .populate({ path: "customer", select: "name number profilePicUrl state district mandal village" })
         .skip(skip)
         .limit(Number(limit))
         .sort({ createdAt: -1 });
