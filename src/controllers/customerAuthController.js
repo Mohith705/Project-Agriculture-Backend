@@ -31,7 +31,7 @@
 //     const tempCust = await Customer.create({ fullName, phoneNumber, address, machineryType, password, paymentCompleted: false });
 
 //     const order = await razorpayInstance.orders.create({
-//         amount: 12500,
+//         amount: 5400, // 54 * 100
 //         currency: "INR",
 //         receipt: `signup_${tempCust._id}`
 //     });
@@ -106,12 +106,12 @@ export const customerSignup = catchAsync(async (req, res) => {
     // create a temporary customer doc (not fully activated until payment verifies)
     const tempCustomer = await Customer.create({ name, number, password, state, district, mandal, village, pinCode, securityQuestion, securityAnswer, status: "inactive" });
 
-    // Rs.125 fixed amount only at signup
+    // Rs.54 fixed amount only at signup
     const razorpay = getRazorpay();
     let order;
     try {
         order = await razorpay.orders.create({
-            amount: 12500, // 125 * 100
+            amount: 5400, // 54 * 100
             currency: "INR",
             receipt: `signup_${tempCustomer._id}`
         });
@@ -139,7 +139,7 @@ export const createRazorpayOrder = catchAsync(async (req, res) => {
     const razorpay = getRazorpay();
 
     const order = await razorpay.orders.create({
-        amount: 12500, // 125 INR
+        amount: 5400, // 54 INR
         currency: "INR",
         receipt: `cust-${customerId}`,
     });
@@ -211,7 +211,7 @@ export const customerLogin = catchAsync(async (req, res) => {
         const razorpay = getRazorpay();
         try {
             const order = await razorpay.orders.create({
-                amount: 12500, // 125 INR
+                amount: 5400, // 54 INR
                 currency: "INR",
                 receipt: `${customer._id}_${Date.now()}`
             });
