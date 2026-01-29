@@ -10,8 +10,7 @@ export const customerSignupValidation = z.object({
         village: z.string().min(1),
         pinCode: z.string().optional(),
         password: z.string().length(4).regex(/^\d{4}$/, "Password must be exactly 4 digits"),
-        securityQuestion: z.string().min(1),
-        securityAnswer: z.string().min(1)
+        resetPin: z.string().length(4).regex(/^\d{4}$/, "Reset PIN must be exactly 4 digits")
     })
 });
 
@@ -44,16 +43,10 @@ export const updateProfileValidation = z.object({
     })
 });
 
-export const getSecurityQuestionValidation = z.object({
-    body: z.object({
-        number: z.string().min(10).max(10)
-    })
-});
-
 export const resetPasswordValidation = z.object({
     body: z.object({
-        customerId: z.string(),
-        securityAnswer: z.string().min(1),
+        number: z.string().min(10).max(10),
+        resetPin: z.string().length(4).regex(/^\d{4}$/, "Reset PIN must be exactly 4 digits"),
         newPassword: z.string().length(4).regex(/^\d{4}$/, "Password must be exactly 4 digits")
     })
 });

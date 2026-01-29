@@ -10,7 +10,7 @@ export const adminGetListings = catchAsync(async (req, res) => {
 
     const filter = {};
     if (status) filter.status = status;
-    if (type) filter.machineType = type;
+    if (type) filter. machineType = type;
 
     const skip = (page - 1) * limit;
 

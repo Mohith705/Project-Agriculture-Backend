@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createListingSchema = z.object({
     machineName: z.string().min(1),
     machineCompany: z.string().min(1),
-    machineType: z.enum(["Tractor", "Harvester", "Tiller", "Plough", "Seeder", "Sprayer", "Other"]),
+    machineType: z.string().min(1),
     machineModel: z.string().min(1),
     manufacturingYear: z.number().min(1900).max(new Date().getFullYear()),
     condition: z.enum(["Excellent", "Good", "Fair"]),
@@ -26,7 +26,7 @@ export const createListingSchema = z.object({
 export const updateListingSchema = z.object({
     machineName: z.string().min(1).optional(),
     machineCompany: z.string().min(1).optional(),
-    machineType: z.enum(["Tractor", "Harvester", "Tiller", "Plough", "Seeder", "Sprayer", "Other"]).optional(),
+    machineType: z.string().min(1).optional(),
     machineModel: z.string().min(1).optional(),
     manufacturingYear: z.number().min(1900).max(new Date().getFullYear()).optional(),
     condition: z.enum(["Excellent", "Good", "Fair"]).optional(),

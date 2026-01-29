@@ -11,12 +11,8 @@ const customerSchema = new mongoose.Schema(
         village: { type: String, required: true },
         pinCode: { type: String },
         password: { type: String, required: true, select: false },
-        
-        securityQuestion: { type: String, required: true },
-        securityAnswer: { type: String, required: true, select: false },
-        
+        resetPin: { type: String, required: true, select: false },
         profilePicUrl: { type: String, default: "" },
-
         paymentCompleted: { type: Boolean, default: false },
         paymentDetails: {
             orderId: { type: String },
@@ -40,9 +36,9 @@ customerSchema.pre("save", async function (next) {
         this.password = await bcrypt.hash(this.password, salt);
     }
     
-    if (this.isModified("securityAnswer")) {
+    if (this.isModified("resetPin")) {
         const salt = await bcrypt.genSalt(10);
-        this.securityAnswer = await bcrypt.hash(this.securityAnswer.toLowerCase(), salt);
+        this.resetPin = await bcrypt.hash(this.resetPin, salt);
     }
     
     next();
@@ -52,8 +48,8 @@ customerSchema.methods.comparePassword = async function (candidate) {
     return bcrypt.compare(candidate, this.password);
 };
 
-customerSchema.methods.compareSecurityAnswer = async function (candidate) {
-    return bcrypt.compare(candidate.toLowerCase(), this.securityAnswer);
+customerSchema.methods.compareResetPin = async function (candidate) {
+    return bcrypt.compare(candidate, this.resetPin);
 };
 
 export default mongoose.model("Customer", customerSchema);

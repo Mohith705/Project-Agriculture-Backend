@@ -1,7 +1,7 @@
 import { Router } from "express";
 import validate from "../middlewares/validate.js";
 import * as custAuth from "../controllers/customerAuthController.js";
-import { customerSignupValidation, razorpayVerifyValidation, customerLoginValidation, updateProfileValidation, getSecurityQuestionValidation, resetPasswordValidation } from "../validations/customerAuth.validation.js";
+import { customerSignupValidation, razorpayVerifyValidation, customerLoginValidation, updateProfileValidation, resetPasswordValidation } from "../validations/customerAuth.validation.js";
 import { protect, customerOnly } from "../middlewares/auth.js";
 import { paymentCheck } from "../middlewares/paymentCheck.js";
 
@@ -33,8 +33,7 @@ const router = Router();
  *             village: "Madhapur"
  *             pinCode: "500081"
  *             password: "1234"
- *             securityQuestion: "What is your favorite color?"
- *             securityAnswer: "blue"
+ *             resetPin: "5678"
  *     responses:
  *       201:
  *         description: Razorpay order created
@@ -124,9 +123,9 @@ router.put("/customer/auth/profile", protect, customerOnly, paymentCheck, valida
 
 /**
  * @swagger
- * /customer/auth/forgot-password/security-question:
+ * /customer/auth/forgot-password/reset:
  *   post:
- *     summary: Get security question for password reset
+ *     summary: Reset password using reset PIN
  *     tags: [Customer Auth]
  *     requestBody:
  *       required: true
@@ -134,30 +133,12 @@ router.put("/customer/auth/profile", protect, customerOnly, paymentCheck, valida
  *         application/json:
  *           example:
  *             number: "9876543210"
- *     responses:
- *       200:
- *         description: Security question retrieved
- */
-router.post("/customer/auth/forgot-password/security-question", validate(getSecurityQuestionValidation), custAuth.getSecurityQuestion);
-
-/**
- * @swagger
- * /customer/auth/forgot-password/reset:
- *   post:
- *     summary: Reset password using security answer
- *     tags: [Customer Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           example:
- *             customerId: "67394a8d4e..."
- *             securityAnswer: "my answer"
+ *             resetPin: "5678"
  *             newPassword: "1234"
  *     responses:
  *       200:
  *         description: Password reset successfully
  */
-router.post("/customer/auth/forgot-password/reset", validate(resetPasswordValidation), custAuth.resetPasswordWithSecurity);
+router.post("/customer/auth/forgot-password/reset", validate(resetPasswordValidation), custAuth.resetPasswordWithPin);
 
 export default router;

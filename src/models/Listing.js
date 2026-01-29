@@ -9,11 +9,7 @@ const listingSchema = new mongoose.Schema(
         },
         machineName: { type: String, required: true },
         machineCompany: { type: String, required: true },
-        machineType: {
-            type: String,
-            enum: ["Tractor", "Harvester", "Tiller", "Plough", "Seeder", "Sprayer", "Other"],
-            required: true,
-        },
+        machineType: { type: String, required: true },
         machineModel: { type: String, required: true },
         manufacturingYear: { type: Number, required: true },
         condition: {
